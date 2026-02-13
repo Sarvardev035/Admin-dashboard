@@ -42,15 +42,6 @@ export const UserDetailsModal = React.memo(
       if (user) togglePinUser(user.id);
     }, [user, togglePinUser]);
 
-    const handleRoleChange = useCallback(
-      (e: React.ChangeEvent<HTMLSelectElement>) => {
-        if (user) {
-          setUserRole(user.id, e.target.value as UserRole);
-        }
-      },
-      [user, setUserRole]
-    );
-
     const handlePermissionToggle = useCallback(
       (key: keyof UserPermissions) => {
         if (user) {

@@ -1,6 +1,6 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import type { User } from '../types';
-import { computeUserMetrics, formatCurrency } from '../utils';
+import { formatCurrency } from '../utils';
 import { useStore } from '../store';
 import { GRID_COLS } from './VirtualizedTable';
 
@@ -19,7 +19,6 @@ const ROLE_COLORS: Record<string, string> = {
 
 export const UserRow = React.memo(
   ({ user, onRowClick, isOptimisticUpdate, isEven }: UserRowProps) => {
-    const metrics = useMemo(() => computeUserMetrics(user), [user]);
     const selectedIds = useStore((state) => state.selectedIds);
     const toggleSelectUser = useStore((state) => state.toggleSelectUser);
     const togglePinUser = useStore((state) => state.togglePinUser);
