@@ -17,13 +17,20 @@ export const SearchAndFilter = React.memo(
     // Local state for instant input feedback; actual search is debounced
     const [localQuery, setLocalQuery] = useState(searchQuery);
 
-    const handleSearchChange = useCallback(
+    const handleSearchInput = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setLocalQuery(value);    // instant UI update
-        onSearchChange(value);   // debounced store update
+        setLocalQuery(e.target.value);  // instant UI update only
       },
-      [onSearchChange]
+      []
+    );
+
+    const handleSearchKeyDown = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+          onSearchChange(localQuery);  // fire search on Enter
+        }
+      },
+      [localQuery, onSearchChange]
     );
 
     const handleDepartmentChange = useCallback(
@@ -78,9 +85,10 @@ export const SearchAndFilter = React.memo(
             <label className="block text-xs font-medium text-gray-500 mb-1">Search Users</label>
             <input
               type="text"
-              placeholder="Name, email, or department..."
+              placeholder="Type and press Enter to search..."
               value={localQuery}
-              onChange={handleSearchChange}
+              onChange={handleSearchInput}
+              onKeyDown={handleSearchKeyDown}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

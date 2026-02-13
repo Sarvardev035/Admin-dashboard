@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useStore } from './store';
-import { useLoadUsers, useDebouncedSearch } from './hooks';
+import { useLoadUsers, useSearchOnEnter } from './hooks';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { VirtualizedTable } from './components/VirtualizedTable';
 import { UserDetailsModal } from './components/UserDetailsModal';
@@ -56,8 +56,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   // Load users on mount
   useLoadUsers();
 
-  // Setup debounced search
-  const handleSearchChange = useDebouncedSearch(400);
+  // Search fires only on Enter
+  const handleSearchChange = useSearchOnEnter();
 
   // Handle search input
   const handleSearch = useCallback(

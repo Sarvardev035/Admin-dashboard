@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useStore } from './store';
 
 export function useLoadUsers() {
@@ -32,24 +32,16 @@ export function useLoadUsers() {
   }, [setUsers, setIsLoading, setError]);
 }
 
-export function useDebouncedSearch(delay: number = 400) {
+export function useSearchOnEnter() {
   const setSearchQuery = useStore((state) => state.setSearchQuery);
   const filterAndSortUsers = useStore((state) => state.filterAndSortUsers);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   return useCallback(
     (query: string) => {
-      // Clear previous timer
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      // Set a new timer — store update + filter only fires after user stops typing
-      timeoutRef.current = setTimeout(() => {
-        setSearchQuery(query);
-        filterAndSortUsers();
-      }, delay);
+      setSearchQuery(query);
+      filterAndSortUsers();
     },
-    [delay, setSearchQuery, filterAndSortUsers]
+    [setSearchQuery, filterAndSortUsers]
   );
 }
 
