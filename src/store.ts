@@ -1,9 +1,20 @@
 import { create } from 'zustand';
-import type { User, FilterOptions, SortConfig, StoreState } from './types';
+import type { User, UserRole, UserPermissions, FilterOptions, SortConfig, StoreState } from './types';
+
+const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
+  admin: { canEdit: true, canDelete: true, canExport: true, canManageUsers: true },
+  editor: { canEdit: true, canDelete: false, canExport: true, canManageUsers: false },
+  viewer: { canEdit: false, canDelete: false, canExport: false, canManageUsers: false },
+};
 
 interface StoreActions {
   setUsers: (users: User[]) => void;
   addUser: (user: User) => void;
+  deleteUser: (userId: string) => void;
+  deleteUsers: (userIds: string[]) => void;
+  togglePinUser: (userId: string) => void;
+  setUserRole: (userId: string, role: UserRole) => void;
+  setUserPermission: (userId: string, key: keyof UserPermissions, value: boolean) => void;
   setSearchQuery: (query: string) => void;
   setSortConfig: (config: SortConfig) => void;
   setFilters: (filters: FilterOptions) => void;
@@ -15,6 +26,11 @@ interface StoreActions {
   setIsLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   filterAndSortUsers: () => void;
+  // Selection
+  selectedIds: Set<string>;
+  toggleSelectUser: (userId: string) => void;
+  selectAllVisible: () => void;
+  clearSelection: () => void;
 }
 
 export const useStore = create<StoreState & StoreActions>((set, get) => ({
@@ -29,6 +45,7 @@ export const useStore = create<StoreState & StoreActions>((set, get) => ({
   isModalOpen: false,
   editingUser: null,
   isOptimisticUpdate: false,
+  selectedIds: new Set<string>(),
 
   setUsers: (users) => {
     set({ users });
@@ -42,6 +59,75 @@ export const useStore = create<StoreState & StoreActions>((set, get) => ({
     const users = [user, ...get().users];
     set({ users });
     get().filterAndSortUsers();
+  },
+
+  deleteUser: (userId) => {
+    const users = get().users.filter((u) => u.id !== userId);
+    const selectedIds = new Set(get().selectedIds);
+    selectedIds.delete(userId);
+    set({ users, selectedIds });
+    get().filterAndSortUsers();
+  },
+
+  deleteUsers: (userIds) => {
+    const idsSet = new Set(userIds);
+    const users = get().users.filter((u) => !idsSet.has(u.id));
+    set({ users, selectedIds: new Set() });
+    get().filterAndSortUsers();
+  },
+
+  togglePinUser: (userId) => {
+    const users = get().users.map((u) =>
+      u.id === userId ? { ...u, isPinned: !u.isPinned } : u
+    );
+    set({ users });
+    get().filterAndSortUsers();
+  },
+
+  setUserRole: (userId, role) => {
+    const users = get().users.map((u) =>
+      u.id === userId ? { ...u, role, permissions: { ...DEFAULT_PERMISSIONS[role] } } : u
+    );
+    set({ users });
+    // Update selectedUser if it's the one being changed
+    const selectedUser = get().selectedUser;
+    if (selectedUser?.id === userId) {
+      const updated = users.find((u) => u.id === userId) ?? null;
+      set({ selectedUser: updated });
+    }
+    get().filterAndSortUsers();
+  },
+
+  setUserPermission: (userId, key, value) => {
+    const users = get().users.map((u) =>
+      u.id === userId ? { ...u, permissions: { ...u.permissions, [key]: value } } : u
+    );
+    set({ users });
+    const selectedUser = get().selectedUser;
+    if (selectedUser?.id === userId) {
+      const updated = users.find((u) => u.id === userId) ?? null;
+      set({ selectedUser: updated });
+    }
+    get().filterAndSortUsers();
+  },
+
+  toggleSelectUser: (userId) => {
+    const selectedIds = new Set(get().selectedIds);
+    if (selectedIds.has(userId)) {
+      selectedIds.delete(userId);
+    } else {
+      selectedIds.add(userId);
+    }
+    set({ selectedIds });
+  },
+
+  selectAllVisible: () => {
+    const ids = new Set(get().filteredUsers.map((u) => u.id));
+    set({ selectedIds: ids });
+  },
+
+  clearSelection: () => {
+    set({ selectedIds: new Set() });
   },
 
   setSearchQuery: (query) => {
@@ -131,8 +217,12 @@ export const useStore = create<StoreState & StoreActions>((set, get) => ({
       return matchesSearch && matchesDepartment && matchesStatus && matchesAge && matchesSalary;
     });
 
-    // Apply sorting
+    // Apply sorting — pinned users always first
     filtered.sort((a, b) => {
+      // Pinned users come first
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
 

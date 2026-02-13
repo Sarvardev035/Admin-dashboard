@@ -1,3 +1,12 @@
+export type UserRole = 'admin' | 'editor' | 'viewer';
+
+export interface UserPermissions {
+  canEdit: boolean;
+  canDelete: boolean;
+  canExport: boolean;
+  canManageUsers: boolean;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -8,6 +17,9 @@ export interface User {
   joinDate: string;
   status: 'active' | 'inactive';
   avatar?: string;
+  role: UserRole;
+  permissions: UserPermissions;
+  isPinned: boolean;
 }
 
 export interface FilterOptions {

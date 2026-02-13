@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import type { User } from '../types';
+import type { User, UserRole } from '../types';
 
 const DEPARTMENTS = ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance', 'Operations'];
+const ROLES: UserRole[] = ['viewer', 'editor', 'admin'];
+
+const DEFAULT_PERMS: Record<UserRole, User['permissions']> = {
+  admin: { canEdit: true, canDelete: true, canExport: true, canManageUsers: true },
+  editor: { canEdit: true, canDelete: false, canExport: true, canManageUsers: false },
+  viewer: { canEdit: false, canDelete: false, canExport: false, canManageUsers: false },
+};
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -16,6 +23,7 @@ const initialForm = {
   department: 'Engineering',
   salary: '',
   status: 'active' as 'active' | 'inactive',
+  role: 'viewer' as UserRole,
 };
 
 export const AddUserModal = React.memo(({ isOpen, onClose, onAdd }: AddUserModalProps) => {
@@ -60,6 +68,9 @@ export const AddUserModal = React.memo(({ isOpen, onClose, onAdd }: AddUserModal
       salary: Number(form.salary),
       joinDate,
       status: form.status,
+      role: form.role,
+      permissions: { ...DEFAULT_PERMS[form.role] },
+      isPinned: false,
     };
 
     onAdd(newUser);
@@ -177,6 +188,21 @@ export const AddUserModal = React.memo(({ isOpen, onClose, onAdd }: AddUserModal
                 <option value="inactive">Inactive</option>
               </select>
             </div>
+          </div>
+
+          {/* Role */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <select
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className={inputClass('role')}
+            >
+              {ROLES.map((r) => (
+                <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+              ))}
+            </select>
           </div>
 
           {/* Actions */}

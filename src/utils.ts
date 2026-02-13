@@ -1,6 +1,13 @@
-import type { User } from './types';
+import type { User, UserRole } from './types';
 
 const DEPARTMENTS = ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance', 'Operations'];
+const ROLES: UserRole[] = ['admin', 'editor', 'viewer'];
+
+const DEFAULT_PERMISSIONS_MAP: Record<UserRole, User['permissions']> = {
+  admin: { canEdit: true, canDelete: true, canExport: true, canManageUsers: true },
+  editor: { canEdit: true, canDelete: false, canExport: true, canManageUsers: false },
+  viewer: { canEdit: false, canDelete: false, canExport: false, canManageUsers: false },
+};
 
 const FIRST_NAMES = [
   'John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 'James', 'Olivia', 'Robert', 'Ava',
@@ -31,6 +38,8 @@ export function generateMockUsers(count: number): User[] {
     const joinDay = Math.floor(Math.random() * 28) + 1;
     const joinDate = `${joinYear}-${String(joinMonth).padStart(2, '0')}-${String(joinDay).padStart(2, '0')}`;
 
+    const role = ROLES[Math.floor(Math.random() * ROLES.length)];
+
     users.push({
       id: `user-${i + 1}`,
       name,
@@ -40,6 +49,9 @@ export function generateMockUsers(count: number): User[] {
       salary,
       joinDate,
       status: status as 'active' | 'inactive',
+      role,
+      permissions: { ...DEFAULT_PERMISSIONS_MAP[role] },
+      isPinned: false,
     });
   }
 

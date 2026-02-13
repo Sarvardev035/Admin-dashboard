@@ -5,6 +5,7 @@ import { SearchAndFilter } from './components/SearchAndFilter';
 import { VirtualizedTable } from './components/VirtualizedTable';
 import { UserDetailsModal } from './components/UserDetailsModal';
 import { AddUserModal } from './components/AddUserModal';
+import { BulkActionsBar } from './components/BulkActionsBar';
 import { ErrorNotification, LoadingState, EmptyState } from './components/States';
 import { LoginPage } from './components/LoginPage';
 import type { SortConfig, User } from './types';
@@ -147,6 +148,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
               filters={filters}
               onFilterChange={handleFilterChange}
             />
+
+            {/* Bulk Actions */}
+            <BulkActionsBar />
 
             {/* Results Count + Add User */}
             <div className="mb-4 flex items-center justify-between">

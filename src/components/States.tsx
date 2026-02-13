@@ -65,7 +65,7 @@ export const LoadingState = React.memo(() => {
           className="bg-gray-50 border-b-2 border-gray-200 grid"
           style={{ gridTemplateColumns: GRID_COLS }}
         >
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="px-3 py-3">
               <div
                 className="h-3 bg-gray-200 rounded animate-pulse"
@@ -82,7 +82,7 @@ export const LoadingState = React.memo(() => {
             className="grid border-b border-gray-100"
             style={{ gridTemplateColumns: GRID_COLS }}
           >
-            {Array.from({ length: 8 }).map((_, colIdx) => (
+            {Array.from({ length: 10 }).map((_, colIdx) => (
               <div key={colIdx} className="px-3 py-3.5">
                 <div
                   className="h-3.5 rounded skeleton-shimmer"

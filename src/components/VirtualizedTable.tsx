@@ -15,7 +15,7 @@ const ROW_HEIGHT = 52;
 const PAGE_SIZE = 50;
 
 // Grid column template shared between header and rows
-export const GRID_COLS = 'minmax(120px,1.2fr) minmax(180px,2fr) 60px minmax(100px,1fr) minmax(90px,1fr) minmax(100px,1fr) 80px 90px';
+export const GRID_COLS = '40px minmax(120px,1.2fr) minmax(160px,1.8fr) 60px minmax(90px,1fr) minmax(90px,1fr) minmax(90px,1fr) 70px 70px 70px 100px';
 
 // SortIcon declared outside the component to avoid re-creation on every render
 function SortIcon({ sortConfig, column }: { sortConfig: SortConfig; column: keyof Omit<User, 'avatar'> }) {
@@ -133,6 +133,20 @@ export const VirtualizedTable = React.memo(
           className="bg-gray-50 border-b-2 border-gray-200 sticky top-0 z-10 grid"
           style={{ gridTemplateColumns: GRID_COLS }}
         >
+          <div className="px-2 py-3 flex items-center justify-center">
+            <input
+              type="checkbox"
+              onChange={(e) => {
+                if (e.target.checked) {
+                  import('../store').then(m => m.useStore.getState().selectAllVisible());
+                } else {
+                  import('../store').then(m => m.useStore.getState().clearSelection());
+                }
+              }}
+              className="w-4 h-4 text-blue-600 rounded border-gray-300 cursor-pointer"
+              title="Select all visible"
+            />
+          </div>
           <div onClick={() => handleSort('name')} className={headerCellClass}>
             Name <SortIcon sortConfig={sortConfig} column="name" />
           </div>
@@ -149,13 +163,16 @@ export const VirtualizedTable = React.memo(
             Salary <SortIcon sortConfig={sortConfig} column="salary" />
           </div>
           <div onClick={() => handleSort('joinDate')} className={headerCellClass}>
-            Join Date <SortIcon sortConfig={sortConfig} column="joinDate" />
+            Join <SortIcon sortConfig={sortConfig} column="joinDate" />
           </div>
           <div onClick={() => handleSort('status')} className={headerCellClass}>
             Status <SortIcon sortConfig={sortConfig} column="status" />
           </div>
-          <div className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider flex items-center">
-            Perf
+          <div className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider flex items-center">
+            Role
+          </div>
+          <div className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider flex items-center">
+            Actions
           </div>
         </div>
 
