@@ -4,6 +4,7 @@ import { useLoadUsers, useDebouncedSearch } from './hooks';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { VirtualizedTable } from './components/VirtualizedTable';
 import { UserDetailsModal } from './components/UserDetailsModal';
+import { AddUserModal } from './components/AddUserModal';
 import { ErrorNotification, LoadingState, EmptyState } from './components/States';
 import { LoginPage } from './components/LoginPage';
 import type { SortConfig, User } from './types';
@@ -47,6 +48,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const setSortConfig = useStore((state) => state.setSortConfig);
   const updateUser = useStore((state) => state.updateUser);
   const setError = useStore((state) => state.setError);
+  const addUser = useStore((state) => state.addUser);
+
+  // Add user modal state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Load users on mount
   useLoadUsers();
@@ -94,6 +99,12 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     updateUser(user);
   }, [updateUser]);
 
+  // Handle add new user
+  const handleAddUser = useCallback((user: User) => {
+    addUser(user);
+    setIsAddModalOpen(false);
+  }, [addUser]);
+
   const resultCount = filteredUsers.length;
 
   return (
@@ -137,12 +148,21 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
               onFilterChange={handleFilterChange}
             />
 
-            {/* Results Count */}
-            <div className="mb-4">
+            {/* Results Count + Add User */}
+            <div className="mb-4 flex items-center justify-between">
               <p className="text-sm text-gray-600">
                 Showing <span className="font-semibold text-gray-900">{resultCount}</span> of{' '}
-                <span className="font-semibold text-gray-900">10,000</span> users
+                <span className="font-semibold text-gray-900">{useStore.getState().users.length.toLocaleString()}</span> users
               </p>
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add User
+              </button>
             </div>
 
             {/* Users Table */}
@@ -172,6 +192,13 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         onClose={handleModalClose}
         onSave={handleUserSave}
         isOptimisticUpdate={isOptimisticUpdate}
+      />
+
+      {/* Add User Modal */}
+      <AddUserModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={handleAddUser}
       />
 
       {/* Footer */}

@@ -3,6 +3,7 @@ import type { User, FilterOptions, SortConfig, StoreState } from './types';
 
 interface StoreActions {
   setUsers: (users: User[]) => void;
+  addUser: (user: User) => void;
   setSearchQuery: (query: string) => void;
   setSortConfig: (config: SortConfig) => void;
   setFilters: (filters: FilterOptions) => void;
@@ -35,6 +36,12 @@ export const useStore = create<StoreState & StoreActions>((set, get) => ({
     setTimeout(() => {
       get().filterAndSortUsers();
     }, 0);
+  },
+
+  addUser: (user) => {
+    const users = [user, ...get().users];
+    set({ users });
+    get().filterAndSortUsers();
   },
 
   setSearchQuery: (query) => {
