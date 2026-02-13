@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import type { FilterOptions } from '../types';
+import { DualRangeSlider } from './DualRangeSlider';
 
 interface SearchAndFilterProps {
   searchQuery: string;
@@ -47,35 +48,24 @@ export const SearchAndFilter = React.memo(
       [filters, onFilterChange]
     );
 
-    const handleAgeMinChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const min = parseInt(e.target.value, 10) || 0;
-        onFilterChange({
-          ...filters,
-          ageRange: {
-            min,
-            max: filters.ageRange?.max || 100,
-          },
-        });
-      },
-      [filters, onFilterChange]
-    );
-
-    const handleAgeMaxChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const max = parseInt(e.target.value, 10) || 100;
-        onFilterChange({
-          ...filters,
-          ageRange: {
-            min: filters.ageRange?.min || 0,
-            max,
-          },
-        });
+    const handleAgeRangeChange = useCallback(
+      (min: number, max: number) => {
+        // If at full range, clear the filter entirely
+        if (min === 22 && max === 65) {
+          const { ageRange: _, ...rest } = filters;
+          onFilterChange(rest);
+        } else {
+          onFilterChange({
+            ...filters,
+            ageRange: { min, max },
+          });
+        }
       },
       [filters, onFilterChange]
     );
 
     const resetFilters = useCallback(() => {
+      setLocalQuery('');
       onSearchChange('');
       onFilterChange({});
     }, [onSearchChange, onFilterChange]);
@@ -130,30 +120,14 @@ export const SearchAndFilter = React.memo(
           </div>
 
           {/* Age Range Filter */}
-          <div className="flex gap-2 min-w-[160px]">
-            <div className="flex-1">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Min Age</label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={filters.ageRange?.min || 0}
-                onChange={handleAgeMinChange}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Max Age</label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={filters.ageRange?.max || 100}
-                onChange={handleAgeMaxChange}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
+          <DualRangeSlider
+            min={22}
+            max={65}
+            valueMin={filters.ageRange?.min ?? 22}
+            valueMax={filters.ageRange?.max ?? 65}
+            onChange={handleAgeRangeChange}
+            label="Age Range"
+          />
 
           {/* Reset Button */}
           <div className="flex items-end">
