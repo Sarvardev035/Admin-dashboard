@@ -1,14 +1,36 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useStore } from './store';
 import { useLoadUsers, useDebouncedSearch } from './hooks';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { VirtualizedTable } from './components/VirtualizedTable';
 import { UserDetailsModal } from './components/UserDetailsModal';
 import { ErrorNotification, LoadingState, EmptyState } from './components/States';
+import { LoginPage } from './components/LoginPage';
 import type { SortConfig, User } from './types';
 import './App.css';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => localStorage.getItem('auth') === 'true'
+  );
+
+  const handleLogin = useCallback(() => {
+    setIsAuthenticated(true);
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('auth');
+    setIsAuthenticated(false);
+  }, []);
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
+  return <Dashboard onLogout={handleLogout} />;
+}
+
+function Dashboard({ onLogout }: { onLogout: () => void }) {
   // Store state
   const filteredUsers = useStore((state) => state.filteredUsers);
   const searchQuery = useStore((state) => state.searchQuery);
@@ -78,9 +100,17 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-1">Manage and view 10,000+ users with high-performance rendering</p>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600 mt-1">Manage and view 10,000+ users with high-performance rendering</p>
+          </div>
+          <button
+            onClick={onLogout}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
