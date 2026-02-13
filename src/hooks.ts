@@ -37,7 +37,7 @@ export function useDebouncedSearch(delay: number = 400) {
   const searchQuery = useStore((state) => state.searchQuery);
   const setSearchQuery = useStore((state) => state.setSearchQuery);
   const filterAndSortUsers = useStore((state) => state.filterAndSortUsers);
-  const debouncedFilterRef = useRef<ReturnType<typeof debounce>>();
+  const debouncedFilterRef = useRef<ReturnType<typeof debounce> | undefined>(undefined);
 
   useEffect(() => {
     if (!debouncedFilterRef.current) {

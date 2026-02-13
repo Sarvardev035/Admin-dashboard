@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useStore } from './store';
 import { useLoadUsers, useDebouncedSearch } from './hooks';
 import { SearchAndFilter } from './components/SearchAndFilter';
