@@ -1,4 +1,5 @@
 import React from 'react';
+import { GRID_COLS } from './VirtualizedTable';
 
 interface ErrorNotificationProps {
   message: string;
@@ -38,10 +39,82 @@ ErrorNotification.displayName = 'ErrorNotification';
 
 export const LoadingState = React.memo(() => {
   return (
-    <div className="flex flex-col items-center justify-center h-96">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-      <p className="text-gray-600 font-medium">Loading users...</p>
-      <p className="text-gray-400 text-sm mt-2">This may take a moment with 10,000+ users</p>
+    <div className="space-y-6 animate-in">
+      {/* Skeleton filter bar */}
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+        <div className="flex flex-wrap gap-3">
+          {[180, 140, 120, 160, 80].map((w, i) => (
+            <div key={i} className="space-y-2" style={{ minWidth: w }}>
+              <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+              <div className="h-9 bg-gray-100 rounded-lg animate-pulse" style={{ animationDelay: `${i * 100}ms` }} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Skeleton count bar */}
+      <div className="flex items-center justify-between">
+        <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+        <div className="h-9 w-28 bg-gray-200 rounded-lg animate-pulse" />
+      </div>
+
+      {/* Skeleton table */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        {/* Header shimmer */}
+        <div
+          className="bg-gray-50 border-b-2 border-gray-200 grid"
+          style={{ gridTemplateColumns: GRID_COLS }}
+        >
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="px-3 py-3">
+              <div
+                className="h-3 bg-gray-200 rounded animate-pulse"
+                style={{ width: `${50 + (i % 3) * 15}%`, animationDelay: `${i * 80}ms` }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Row skeletons with carousel shimmer */}
+        {Array.from({ length: 10 }).map((_, rowIdx) => (
+          <div
+            key={rowIdx}
+            className="grid border-b border-gray-100"
+            style={{ gridTemplateColumns: GRID_COLS }}
+          >
+            {Array.from({ length: 8 }).map((_, colIdx) => (
+              <div key={colIdx} className="px-3 py-3.5">
+                <div
+                  className="h-3.5 rounded skeleton-shimmer"
+                  style={{
+                    width: colIdx === 1 ? '85%' : colIdx === 6 ? '60%' : '70%',
+                    animationDelay: `${rowIdx * 120 + colIdx * 60}ms`,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        ))}
+
+        {/* Skeleton pagination */}
+        <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 flex items-center justify-between">
+          <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
+          <div className="flex gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-7 w-8 bg-gray-200 rounded animate-pulse"
+                style={{ animationDelay: `${i * 100}ms` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Loading text */}
+      <div className="text-center">
+        <p className="text-sm text-gray-500">Loading 10,000+ users...</p>
+      </div>
     </div>
   );
 });
