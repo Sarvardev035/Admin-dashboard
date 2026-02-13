@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react';
 import type { FilterOptions } from '../types';
-import { DualRangeSlider } from './DualRangeSlider';
 
 interface SearchAndFilterProps {
   searchQuery: string;
@@ -55,17 +54,29 @@ export const SearchAndFilter = React.memo(
       [filters, onFilterChange]
     );
 
-    const handleAgeRangeChange = useCallback(
-      (min: number, max: number) => {
-        // If at full range, clear the filter entirely
-        if (min === 22 && max === 65) {
+    const handleAgeMinChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value === '' ? 0 : Math.max(0, Math.min(100, parseInt(e.target.value, 10) || 0));
+        const currentMax = filters.ageRange?.max ?? 100;
+        if (val === 0 && currentMax === 100) {
           const { ageRange: _, ...rest } = filters;
           onFilterChange(rest);
         } else {
-          onFilterChange({
-            ...filters,
-            ageRange: { min, max },
-          });
+          onFilterChange({ ...filters, ageRange: { min: val, max: currentMax } });
+        }
+      },
+      [filters, onFilterChange]
+    );
+
+    const handleAgeMaxChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value === '' ? 100 : Math.max(0, Math.min(100, parseInt(e.target.value, 10) || 100));
+        const currentMin = filters.ageRange?.min ?? 0;
+        if (currentMin === 0 && val === 100) {
+          const { ageRange: _, ...rest } = filters;
+          onFilterChange(rest);
+        } else {
+          onFilterChange({ ...filters, ageRange: { min: currentMin, max: val } });
         }
       },
       [filters, onFilterChange]
@@ -128,14 +139,30 @@ export const SearchAndFilter = React.memo(
           </div>
 
           {/* Age Range Filter */}
-          <DualRangeSlider
-            min={22}
-            max={65}
-            valueMin={filters.ageRange?.min ?? 22}
-            valueMax={filters.ageRange?.max ?? 65}
-            onChange={handleAgeRangeChange}
-            label="Age Range"
-          />
+          <div className="flex gap-2 items-end min-w-[160px]">
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Min Age</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={filters.ageRange?.min ?? 0}
+                onChange={handleAgeMinChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Max Age</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={filters.ageRange?.max ?? 100}
+                onChange={handleAgeMaxChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
 
           {/* Reset Button */}
           <div className="flex items-end">
