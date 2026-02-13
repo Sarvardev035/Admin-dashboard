@@ -11,15 +11,18 @@ interface VirtualizedTableProps {
   isOptimisticUpdate: boolean;
 }
 
-const ROW_HEIGHT = 60;
+const ROW_HEIGHT = 52;
+
+// Grid column template shared between header and rows
+export const GRID_COLS = 'minmax(120px,1.2fr) minmax(180px,2fr) 60px minmax(100px,1fr) minmax(90px,1fr) minmax(100px,1fr) 80px 90px';
 
 // SortIcon declared outside the component to avoid re-creation on every render
 function SortIcon({ sortConfig, column }: { sortConfig: SortConfig; column: keyof Omit<User, 'avatar'> }) {
   if (sortConfig.key !== column) {
-    return <span className="text-gray-400 ml-2">⇅</span>;
+    return <span className="text-gray-400 ml-1 text-xs">⇅</span>;
   }
   return (
-    <span className="text-blue-600 ml-2">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+    <span className="text-blue-600 ml-1 text-xs">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
   );
 }
 
@@ -41,15 +44,12 @@ const Row = React.memo(
 
     return (
       <div style={style}>
-        <table className="w-full">
-          <tbody>
-            <UserRow
-              user={user}
-              onRowClick={data.onRowClick}
-              isOptimisticUpdate={data.isOptimisticUpdate}
-            />
-          </tbody>
-        </table>
+        <UserRow
+          user={user}
+          onRowClick={data.onRowClick}
+          isOptimisticUpdate={data.isOptimisticUpdate}
+          isEven={index % 2 === 0}
+        />
       </div>
     );
   }
@@ -81,60 +81,43 @@ export const VirtualizedTable = React.memo(
       [onSort]
     );
 
+    const headerCellClass =
+      'px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none flex items-center';
+
     return (
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead className="bg-gray-50 sticky top-0 z-10">
-            <tr className="border-b-2 border-gray-300">
-              <th
-                onClick={() => handleSort('name')}
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
-              >
-                Name <SortIcon sortConfig={sortConfig} column="name" />
-              </th>
-              <th
-                onClick={() => handleSort('email')}
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
-              >
-                Email <SortIcon sortConfig={sortConfig} column="email" />
-              </th>
-              <th
-                onClick={() => handleSort('age')}
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
-              >
-                Age <SortIcon sortConfig={sortConfig} column="age" />
-              </th>
-              <th
-                onClick={() => handleSort('department')}
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
-              >
-                Department <SortIcon sortConfig={sortConfig} column="department" />
-              </th>
-              <th
-                onClick={() => handleSort('salary')}
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
-              >
-                Salary <SortIcon sortConfig={sortConfig} column="salary" />
-              </th>
-              <th
-                onClick={() => handleSort('joinDate')}
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
-              >
-                Join Date <SortIcon sortConfig={sortConfig} column="joinDate" />
-              </th>
-              <th
-                onClick={() => handleSort('status')}
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
-              >
-                Status <SortIcon sortConfig={sortConfig} column="status" />
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                Performance
-              </th>
-            </tr>
-          </thead>
-        </table>
-        
+      <div className="overflow-x-auto min-w-0">
+        {/* Header row using grid */}
+        <div
+          className="bg-gray-50 border-b-2 border-gray-200 sticky top-0 z-10 grid"
+          style={{ gridTemplateColumns: GRID_COLS }}
+        >
+          <div onClick={() => handleSort('name')} className={headerCellClass}>
+            Name <SortIcon sortConfig={sortConfig} column="name" />
+          </div>
+          <div onClick={() => handleSort('email')} className={headerCellClass}>
+            Email <SortIcon sortConfig={sortConfig} column="email" />
+          </div>
+          <div onClick={() => handleSort('age')} className={headerCellClass}>
+            Age <SortIcon sortConfig={sortConfig} column="age" />
+          </div>
+          <div onClick={() => handleSort('department')} className={headerCellClass}>
+            Dept <SortIcon sortConfig={sortConfig} column="department" />
+          </div>
+          <div onClick={() => handleSort('salary')} className={headerCellClass}>
+            Salary <SortIcon sortConfig={sortConfig} column="salary" />
+          </div>
+          <div onClick={() => handleSort('joinDate')} className={headerCellClass}>
+            Join Date <SortIcon sortConfig={sortConfig} column="joinDate" />
+          </div>
+          <div onClick={() => handleSort('status')} className={headerCellClass}>
+            Status <SortIcon sortConfig={sortConfig} column="status" />
+          </div>
+          <div className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider flex items-center">
+            Perf
+          </div>
+        </div>
+
+        {/* Virtualized rows */}
         {users.length > 0 ? (
           <List
             height={600}
