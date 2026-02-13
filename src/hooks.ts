@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useStore } from './store';
-import { debounce } from './utils';
 
 export function useLoadUsers() {
   const setUsers = useStore((state) => state.setUsers);
@@ -34,24 +33,24 @@ export function useLoadUsers() {
 }
 
 export function useDebouncedSearch(delay: number = 400) {
-  const searchQuery = useStore((state) => state.searchQuery);
   const setSearchQuery = useStore((state) => state.setSearchQuery);
   const filterAndSortUsers = useStore((state) => state.filterAndSortUsers);
-  const debouncedFilterRef = useRef<ReturnType<typeof debounce> | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => {
-    if (!debouncedFilterRef.current) {
-      debouncedFilterRef.current = debounce(() => {
+  return useCallback(
+    (query: string) => {
+      // Clear previous timer
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      // Set a new timer — store update + filter only fires after user stops typing
+      timeoutRef.current = setTimeout(() => {
+        setSearchQuery(query);
         filterAndSortUsers();
       }, delay);
-    }
-
-    debouncedFilterRef.current();
-  }, [searchQuery, delay, filterAndSortUsers]);
-
-  return (query: string) => {
-    setSearchQuery(query);
-  };
+    },
+    [delay, setSearchQuery, filterAndSortUsers]
+  );
 }
 
 export function useUserModal() {

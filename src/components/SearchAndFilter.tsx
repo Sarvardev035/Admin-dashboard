@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { FilterOptions } from '../types';
 
 interface SearchAndFilterProps {
@@ -13,9 +13,14 @@ const STATUSES = ['active', 'inactive'];
 
 export const SearchAndFilter = React.memo(
   ({ searchQuery, onSearchChange, filters, onFilterChange }: SearchAndFilterProps) => {
+    // Local state for instant input feedback; actual search is debounced
+    const [localQuery, setLocalQuery] = useState(searchQuery);
+
     const handleSearchChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
-        onSearchChange(e.target.value);
+        const value = e.target.value;
+        setLocalQuery(value);    // instant UI update
+        onSearchChange(value);   // debounced store update
       },
       [onSearchChange]
     );
@@ -84,7 +89,7 @@ export const SearchAndFilter = React.memo(
             <input
               type="text"
               placeholder="Name, email, or department..."
-              value={searchQuery}
+              value={localQuery}
               onChange={handleSearchChange}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
